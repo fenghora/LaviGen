@@ -1,0 +1,116 @@
+name: sf
+tag: sf_stage_2w_steps
+exp_root_dir: "outputs"
+seed: 42
+
+data:
+  target: diffactory.data.layout_synthesis_sf.LayoutSynthesisSFDataModule
+  params:
+    data_file: /path/to/layout_dataset.jsonl
+    # data_file: /path/to/3d_front_dataset.jsonl
+    train_indices: [0, null]
+    val_indices: [0, null]
+    test_indices: [0, null]
+    repeat: 1
+    min_objects: 1
+    max_objects: 10
+    batch_size: 1
+    eval_batch_size: 1
+    num_workers: 8
+    
+    # Text processing (same as sparse_structure DataModule)
+    pretrained_qwen_processor_name_or_path: /path/to/trellis_sparse_structure_checkpoint/feature_extractor
+    qwen_prompt_template: "<|im_start|>system\nYou are a helpful and creative assistant for generating 3D models. Your task is to analyze the user's input, which may include text, an image, or both. Your goal is to provide a comprehensive, detailed, and imaginative description for creating a 3D asset.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"
+    qwen_prompt_template_start_idx: 64
+    qwen_prompt_max_length: 1024
+    cond_drop_prob: 0.1
+    cond_drop_type: "empty"
+
+system:
+  target: diffactory.systems.shape_synthesis.system_qwenvoxel_layout_stage.QwenVoxelSystemLayoutSynthesisSF
+  params:
+    check_train_every_n_steps: 1000
+    cleanup_after_validation_step: true
+    cleanup_after_test_step: true
+    check_val_limit_rank: 1
+
+    # Model paths
+    base_model: /path/to/lavigen_stage1_pipeline
+    fake_score_pretrained_model_name_or_path: /path/to/trellis_sparse_structure_checkpoint
+    teacher_pretrained_model_name_or_path: /path/to/lavigen_stage1_pipeline
+    scene_teacher_pretrained_model_name_or_path: /path/to/trellis_sparse_structure_checkpoint
+
+    # Training
+    trainable_modules: ["transformer", "connector"]
+    gradient_checkpointing: true
+    resolution: 64
+
+    # Self-Forcing
+    sf_num_inference_steps: 30
+    sf_same_step_across_objects: true
+    sf_last_step_only: false
+
+    # DMD settings
+    dmd_enabled: true
+    dmd_weight: 1.0
+    real_guidance_scale: 3.0
+    fake_guidance_scale: 0.0
+    denoising_loss_type: "flow"
+
+    # Teacher
+    teacher_flow_shift: 1.0
+
+    # Timesteps
+    denoising_step_list: [0, 2, 5, 11, -1]
+    num_train_timestep: 1000
+    min_score_timestep: 0
+
+    # Alternating training
+    dfake_gen_update_ratio: 5
+
+    # EMA
+    ema_weight: 0.99
+    ema_start_step: 200
+    ema_offload_cpu: true
+
+    # Evaluation
+    eval_num_inference_steps: 30
+    eval_seed: 42
+    eval_guidance_scale: 6.0
+
+    # Optimizer
+    optimizer:
+      name: AdamW
+      args:
+        lr: 2e-6
+        betas: [0.0, 0.999]
+        weight_decay: 0.01
+      params:
+        student:
+          lr: 2e-6
+        fake_score:
+          lr: 5e-7
+
+    # Scheduler
+    scheduler:
+      name: ConstantLR
+      interval: step
+      args:
+        factor: 1.0
+        total_iters: 9999999
+
+trainer:
+  max_steps: 15000
+  log_every_n_steps: 10
+  num_sanity_val_steps: 0
+  val_check_interval: 0.5
+  limit_val_batches: 4
+  enable_progress_bar: true
+  precision: bf16-mixed
+  strategy: deepspeed_stage_2
+  accumulate_grad_batches: 1
+  enable_model_summary: false
+
+checkpoint:
+  every_n_train_steps: 5000
+  save_top_k: -1

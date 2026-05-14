@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Environments
+.env
+.venv/
+venv/
+env/
+conda-meta/
+
+# Training outputs and logs
+outputs/
+debug/
+logs/
+wandb/
+lightning_logs/
+tb_logs/
+*.log
+
+# Checkpoints and model weights
+*.ckpt
+*.pt
+*.pth
+*.safetensors
+
+# Data artifacts
+data/
+datasets/
+*.npz
+*.npy
+*.jsonl
+
+# Generated visualizations / exports
+*.ply
+*.obj
+*.glb
+*.gltf

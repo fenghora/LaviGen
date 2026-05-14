@@ -1,0 +1,126 @@
+name: lavigen_layout_synthesis
+tag: lavigen--trellis-init--layout-stage1--cfg-empty--bs16--patch2
+exp_root_dir: "outputs"
+seed: 42
+
+data:
+  target: diffactory.data.sparse_structure.SparseStructureDataModule
+  params:
+    dataset:
+      layout_synthesis:
+        target: diffactory.data.layout_synthesis.LayoutSynthesisDataset
+        params:
+          cfg:
+            data_file: /path/to/layout_dataset.jsonl
+            # data_file: /path/to/3d_front_dataset.jsonl
+            # data_file: /path/to/internscenes_dataset.jsonl
+            train_indices: [0, null]
+            val_indices: [0, null]
+            test_indices: [0, null]
+            repeat: 1
+    
+          # train_indices: [0, null]
+          # val_indices: [0, null]
+          # test_indices: [0, null]
+          # repeat: 10000
+
+    shuffle_train: true
+
+    # preprocess in collate_fn
+    pretrained_qwen_processor_name_or_path: /path/to/trellis_sparse_structure_checkpoint/feature_extractor
+    qwen_prompt_template: "<|im_start|>system\nYou are a helpful and creative assistant for generating 3D models. Your task is to analyze the user's input, which may include text, an image, or both. Your goal is to provide a comprehensive, detailed, and imaginative description for creating a 3D asset.<|im_end|>\n<|im_start|>user\n{}<|im_end|>\n<|im_start|>assistant\n"
+    qwen_prompt_template_start_idx: 64
+
+    cond_drop_prob: 0.1
+    cond_drop_type: "empty"
+
+    batch_size: 16
+    eval_batch_size: 1
+    num_workers: 8
+
+system:
+  target: diffactory.systems.shape_synthesis.system_qwenvoxel_layout_synthesis.QwenVoxelSystemLayoutSynthesis
+  params:
+    check_train_every_n_steps: 1000
+    cleanup_after_validation_step: true
+    cleanup_after_test_step: true
+    check_val_limit_rank: -1
+
+    # Model
+    base_model: /path/to/trellis_sparse_structure_checkpoint
+    # pretrained_qwen_model_name_or_path: /path/to/condition_encoder
+    # pretrained_vae_model_name_or_path: /path/to/trellis_sparse_structure_checkpoint/vae
+
+    # 1.8B
+    # transformer_config:
+    #   attention_head_dim: 96
+    #   axes_dims_rope: [6, 30, 30, 30]
+    #   guidance_embeds: false
+    #   in_channels: 8
+    #   joint_attention_dim: 1536
+    #   num_attention_heads: 16
+    #   num_layers: 21
+    #   out_channels: 8
+    #   patch_size: 1
+
+    # 3B
+    transformer_config:
+      attention_head_dim: 128
+      axes_dims_rope: [8, 40, 40, 40]
+      guidance_embeds: false
+      in_channels: 64
+      joint_attention_dim: 2048
+      num_attention_heads: 16
+      num_layers: 21
+      out_channels: 8
+      patch_size: 2
+
+    noise_scheduler_config:
+      num_train_timesteps: 1000
+      shift: 1.0
+      use_dynamic_shifting: false
+
+    # Training
+    trainable_modules: ["transformer", "connector"]
+    gradient_checkpointing: true
+    weighting_scheme: logit_normal
+
+    resolution: 64
+
+    # Evaluation
+    eval_seed: 42
+    eval_num_inference_steps: 30
+    eval_guidance_scale: 6.0
+
+    # optimizer definition
+    # you can set different learning rates separately for each group of parameters, but note that if you do this you should specify EVERY trainable parameters
+    optimizer:
+      name: AdamW
+      args:
+        lr: 5e-5
+        betas: [0.9, 0.999]
+        weight_decay: 0.01
+
+    # For overfit
+    scheduler:
+      name: ConstantLR
+      interval: step
+      args:
+        factor: 1.0
+        total_iters: 9999999
+
+trainer:
+  max_steps: 10000
+  log_every_n_steps: 10
+  num_sanity_val_steps: 1
+  val_check_interval: 0.1
+  limit_val_batches: 1
+  enable_progress_bar: true
+  precision: bf16-mixed
+  gradient_clip_val: 1.0
+  strategy: deepspeed_stage_2
+  accumulate_grad_batches: 1
+
+checkpoint:
+  every_n_train_steps: 5000
+  save_top_k: -1
