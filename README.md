@@ -1,7 +1,7 @@
 # LaviGen: Repurposing 3D Generative Model for Autoregressive Layout Generation
 
 <p align="center">
-  <a href='#'><img src='https://img.shields.io/badge/arXiv-Paper-red?logo=arxiv&logoColor=white' alt='arXiv'></a>
+  <a href='https://arxiv.org/abs/2604.16299'><img src='https://img.shields.io/badge/arXiv-Paper-red?logo=arxiv&logoColor=white' alt='arXiv'></a>
   <a href='https://fenghora.github.io/LaviGen-Page/'><img src='https://img.shields.io/badge/Project_Page-Website-green?logo=googlechrome&logoColor=white' alt='Project Page'></a>
   <a href='https://github.com/fenghora/LaviGen'><img src='https://img.shields.io/badge/GitHub-Code-blue?logo=github&logoColor=white' alt='Code'></a>
 </p>
