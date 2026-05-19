@@ -90,6 +90,12 @@ import os
 import sys
 
 
+if __package__ in (None, ""):
+    package_root = os.path.dirname(os.path.abspath(__file__))
+    sys.path.insert(0, os.path.dirname(package_root))
+    __package__ = os.path.basename(package_root)
+
+
 def main(args, extras) -> None:
     # set CUDA_VISIBLE_DEVICES if needed, then import pytorch-lightning
     os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
@@ -130,7 +136,7 @@ def main(args, extras) -> None:
     if args.typecheck:
         from jaxtyping import install_import_hook
 
-        install_import_hook("diffactory", "typeguard.typechecked")
+        install_import_hook("LaviGen", "typeguard.typechecked")
 
     from .trainer.base import BaseSystem
     from .utils.system_utils.callbacks import (

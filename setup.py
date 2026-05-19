@@ -1,4 +1,7 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
+
+
+packages = ["LaviGen"] + [f"LaviGen.{pkg}" for pkg in find_packages()]
 
 setup(
     name="lavigen",
@@ -6,7 +9,8 @@ setup(
     description="Repurposing 3D Generative Model for Autoregressive Layout Generation",
     author="Haoran Feng, Yifan Niu, Zehuan Huang, Yang-Tian Sun, Chunchao Guo, Yuxin Peng, Lu Sheng",
     url="https://github.com/fenghora/LaviGen",
-    packages=find_packages(),
+    packages=packages,
+    package_dir={"LaviGen": "."},
     python_requires=">=3.10",
     install_requires=[
         # "bitsandbytes",

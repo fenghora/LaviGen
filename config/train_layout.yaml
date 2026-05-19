@@ -4,11 +4,11 @@ exp_root_dir: "outputs"
 seed: 42
 
 data:
-  target: diffactory.data.sparse_structure.SparseStructureDataModule
+  target: LaviGen.dataset.sparse_structure.SparseStructureDataModule
   params:
     dataset:
       layout_synthesis:
-        target: diffactory.data.layout_synthesis.LayoutSynthesisDataset
+        target: LaviGen.dataset.layout_synthesis.LayoutSynthesisDataset
         params:
           cfg:
             data_file: /path/to/layout_dataset.jsonl
@@ -39,7 +39,7 @@ data:
     num_workers: 8
 
 system:
-  target: diffactory.systems.shape_synthesis.system_qwenvoxel_layout_synthesis.QwenVoxelSystemLayoutSynthesis
+  target: LaviGen.trainer.system_qwenvoxel_layout_synthesis.QwenVoxelSystemLayoutSynthesis
   params:
     check_train_every_n_steps: 1000
     cleanup_after_validation_step: true

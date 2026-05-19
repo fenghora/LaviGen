@@ -248,7 +248,8 @@ class LayoutSynthesisSFDataModule(pl.LightningDataModule):
         self.cfg = parse_structured(LayoutSynthesisSFDataModuleConfig, {**kwargs})
         
         if self.cfg.pretrained_qwen_processor_name_or_path is not None:
-            from transtudio.models.qwen2_5_vl import Qwen2_5_VLProcessor
+            from transformers.models.qwen2_5_vl import Qwen2_5_VLProcessor
+
             self.qwen_processor = Qwen2_5_VLProcessor.from_pretrained(
                 self.cfg.pretrained_qwen_processor_name_or_path
             )
@@ -294,4 +295,3 @@ class LayoutSynthesisSFDataModule(pl.LightningDataModule):
 
     def predict_dataloader(self) -> DataLoader:
         return self.test_dataloader()
-

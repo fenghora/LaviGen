@@ -4,7 +4,7 @@ exp_root_dir: "outputs"
 seed: 42
 
 data:
-  target: diffactory.data.layout_synthesis_sf.LayoutSynthesisSFDataModule
+  target: LaviGen.dataset.layout_synthesis_sf.LayoutSynthesisSFDataModule
   params:
     data_file: /path/to/layout_dataset.jsonl
     # data_file: /path/to/3d_front_dataset.jsonl
@@ -27,7 +27,7 @@ data:
     cond_drop_type: "empty"
 
 system:
-  target: diffactory.systems.shape_synthesis.system_qwenvoxel_layout_stage.QwenVoxelSystemLayoutSynthesisSF
+  target: LaviGen.trainer.system_qwenvoxel_layout_dualTeacher.QwenVoxelSystemLayoutSynthesisSF
   params:
     check_train_every_n_steps: 1000
     cleanup_after_validation_step: true
